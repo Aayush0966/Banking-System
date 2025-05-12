@@ -44,7 +44,7 @@ public class Account extends BankEntity {
         transactions.add(transaction);
     }
 
-    public void withdraw(int amount) throws InsufficientFundsException {
+    public void withdraw(double amount) throws InsufficientFundsException {
         if (amount <= 0) {
             throw new IllegalArgumentException("Withdrawal amount must be positive.");
         }

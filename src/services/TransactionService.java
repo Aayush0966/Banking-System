@@ -6,12 +6,10 @@ import exceptions.InvalidDataException;
 import model.Account;
 import model.Customer;
 import model.Transaction;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 public class TransactionService {
     private final FileHandler<Customer> customerFileHandler;
