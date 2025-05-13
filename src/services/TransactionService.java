@@ -10,16 +10,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 public class TransactionService {
-    private final FileHandler<Customer> customerFileHandler;
-    private final FileHandler<Transaction> transactionFileHandler;
+    private final CustomerCSVHandler customerFileHandler;
+    private final TransactionCSVHandler transactionFileHandler;
+    private final AccountCSVHandler accountFileHandler;
     private List<Customer> customers;
     private List<Transaction> transactions;
+    private List<Account> accounts;
 
     public TransactionService() {
-        customerFileHandler = new FileHandler<>("customers.ser");
-        transactionFileHandler = new FileHandler<>("transactions.ser");
+        accountFileHandler = new AccountCSVHandler("accounts.csv");
+        customerFileHandler = new CustomerCSVHandler("customers.csv");
+        transactionFileHandler = new TransactionCSVHandler("transactions.csv");
         loadDataFromFile();
     }
 
@@ -28,10 +30,17 @@ public class TransactionService {
         try {
             customers = customerFileHandler.loadData();
             transactions = transactionFileHandler.loadData();
+            accounts = accountFileHandler.loadData();
+
+            for (Account account : accounts) {
+             Customer owner = findCustomerById(account.getCustomerId());
+             owner.addAccount(account);
+            }
         } catch (FileReadException | InvalidDataException e) {
             System.err.println("Error loading data: " + e.getMessage());
             customers = new ArrayList<>();
             transactions = new ArrayList<>();
+            accounts = new ArrayList<>();
         }
     }
 
@@ -39,6 +48,7 @@ public class TransactionService {
         try {
             customerFileHandler.saveData(customers);
             transactionFileHandler.saveData(transactions);
+            accountFileHandler.saveData(accounts);
         } catch (FileReadException e) {
             System.err.println("Error saving data: " + e.getMessage());
         }
@@ -192,6 +202,5 @@ public class TransactionService {
         }
         return  sortedTransaction;
     }
-
 
 }

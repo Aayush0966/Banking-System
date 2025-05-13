@@ -23,6 +23,10 @@ public class Account extends BankEntity {
         return accountNumber;
     }
 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     public double getBalance() {
         return balance;
     }
