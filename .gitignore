@@ -1,0 +1,34 @@
+### IntelliJ IDEA ###
+out/
+
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+transactions.ser
+customers.ser
+
+.idea/
+Banking System.iml
+accounts.csv
+customers.csv
+transactions.csv
+
+### Mac OS ###
+.DS_Store

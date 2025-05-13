@@ -35,7 +35,6 @@ public class AccountCSVHandler implements IFileHandler<Account> {
             }
         } catch (Exception e) {
             throw new FileReadException("Error while reading file " + fileName + e.getMessage());
-
         } catch (Throwable e) {
             throw new InvalidDataException("Error while reading file " + fileName + e.getMessage());
         }

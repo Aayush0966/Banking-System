@@ -16,6 +16,7 @@ public class LoginUI extends BaseFrame{
         super("Banking System - Login");
         System.out.println("LoginUI initialized");
         this.authService = new AuthService();
+        init();
     }
 
     @Override
@@ -48,6 +49,7 @@ public class LoginUI extends BaseFrame{
 //        if (authService.login(username, password)) {
             JOptionPane.showMessageDialog(this, "Login Successful", "Success", JOptionPane.INFORMATION_MESSAGE);
             new DashboardUI(authService);
+            dispose();
 
 //        }
 //        else {

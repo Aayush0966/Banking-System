@@ -17,6 +17,7 @@ public class Account extends BankEntity {
         this.transactions =  new ArrayList<>();
         this.accountNumber = accountNumber;
         this.balance = 0.0;
+        this.customerId = customerId;
     }
 
     public String getAccountNum() {

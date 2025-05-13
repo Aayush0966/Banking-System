@@ -114,6 +114,7 @@ public class TransactionService {
         Customer customer = findCustomerById(customerId);
         if (customer != null) {
             customers.remove(customer);
+            accounts.addAll(customer.getAccounts());
             saveDataToFile();
             return true;
         }
@@ -121,8 +122,10 @@ public class TransactionService {
     }
 
     public boolean addAccount(String customerId, Account account) {
+        System.out.println(customerId + " " + account.getAccountNum());
         Customer customer = findCustomerById(customerId);
         if (customer != null) {
+            accounts.add(account);
             customer.addAccount(account);
             saveDataToFile();
             return true;
@@ -145,6 +148,7 @@ public class TransactionService {
         if (account == null) return false;
         try {
             account.deposit(amount);
+            transactions.addAll(account.getTransactions());
             saveDataToFile();
             return true;
         } catch (IllegalArgumentException e) {
@@ -158,6 +162,7 @@ public class TransactionService {
         if (account == null) return false;
         try {
             account.withdraw(amount);
+            transactions.addAll( account.getTransactions());
             saveDataToFile();
             return true;
         } catch (InsufficientFundsException | IllegalArgumentException e) {
@@ -174,6 +179,7 @@ public class TransactionService {
 
         try {
             sendingAccount.transfer(receivingAccount, amount);
+            transactions.addAll(sendingAccount.getTransactions());
             saveDataToFile();
             return  true;
         } catch (InsufficientFundsException e) {
@@ -185,13 +191,16 @@ public class TransactionService {
     public List<Transaction> getTransactionsByAccount(String accountId) {
         List<Transaction> sortedTransactions = new ArrayList<>();
         for (Transaction transaction : transactions) {
-            if (transaction.getSendingAccountId().equals(accountId) ||
-                    transaction.getReceivingAccountId().equals(accountId)) {
-                sortedTransactions.add(transaction);
-            }
+            String sendingId = transaction.getSendingAccountId();
+            String receivingId = transaction.getReceivingAccountId();
+        
+        if ((sendingId != null && sendingId.equals(accountId)) ||
+            (receivingId != null && receivingId.equals(accountId))) {
+            sortedTransactions.add(transaction);
         }
-        return sortedTransactions;
     }
+    return sortedTransactions;
+}
 
     public List<Transaction> getTransactionByDateRange(Date startDate, Date endDate) {
         List<Transaction> sortedTransaction = new ArrayList<>();
