@@ -25,6 +25,8 @@ public class TransactionUI extends BaseFrame {
         this.account = account;
         this.customer = customer;
 
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
         transactionTableModel = new DefaultTableModel(
                 new Object[]{"ID", "Type", "Amount", "Date", "From/To"}, 0
         ) {
