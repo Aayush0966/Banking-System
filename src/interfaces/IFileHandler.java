@@ -8,7 +8,7 @@ import model.Customer;
 import java.util.List;
 
 public interface IFileHandler<T> {
-void saveData(List<T> data) throws FileReadException;
+    void saveData(List<T> data) throws FileReadException;
     List<T> loadData() throws FileReadException, InvalidDataException;
 
 }

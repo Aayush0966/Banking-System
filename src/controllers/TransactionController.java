@@ -17,7 +17,6 @@ public class TransactionController {
         this.accountId = accountId;
     }
 
-    // Transaction data retrieval
     public List<Transaction> getTransactions() {
         return transactionService.getTransactionsByAccount(accountId);
     }
@@ -34,7 +33,6 @@ public class TransactionController {
         return null;
     }
 
-    // Transaction processing business logic
     public boolean deposit(double amount) {
         if (!isValidAmount(amount)) {
             return false;
@@ -47,47 +45,39 @@ public class TransactionController {
             return false;
         }
         return transactionService.withdraw(accountId, amount);
-    }    public boolean transfer(String targetAccountId, double amount) {
+    }  
+    
+    public boolean transfer(String targetAccountId, double amount) {
         if (!isValidAmount(amount)) {
             System.err.println("Transfer failed: Invalid amount " + amount);
             return false;
         }
 
-        // Validate target account exists
         Account targetAccount = transactionService.findAccountById(targetAccountId);
         if (targetAccount == null) {
             System.err.println("Transfer failed: Target account not found " + targetAccountId);
             return false;
         }
 
-        // Prevent self-transfer
         if (accountId.equals(targetAccountId)) {
             System.err.println("Transfer failed: Self transfer attempted from " + accountId + " to " + targetAccountId);
             return false;
         }
 
-        // Get source account to check balance
         Account sourceAccount = transactionService.findAccountById(accountId);
         if (sourceAccount == null) {
             System.err.println("Transfer failed: Source account not found " + accountId);
             return false;
         }
 
-        // Check if source account has enough funds
         if (sourceAccount.getBalance() < amount) {
             System.err.println("Transfer failed: Insufficient funds. Balance: " + sourceAccount.getBalance() + ", Amount: " + amount);
             return false;
-        }        // Log the transfer attempt with debug info
-        System.out.println("Attempting transfer: From " + accountId + " to " + targetAccountId + " amount: " + amount);
-        System.out.println("Source account: " + sourceAccount.getName() + " (" + sourceAccount.getId() + "), balance: " + sourceAccount.getBalance());
-        System.out.println("Target account: " + targetAccount.getName() + " (" + targetAccount.getId() + "), balance: " + targetAccount.getBalance());
-        
+        }        
         boolean result = transactionService.transfer(accountId, targetAccountId, amount);
-        System.out.println("Transfer result: " + (result ? "Success" : "Failed"));
         return result;
     }
 
-    // Transaction formatting for UI display
     public Object[] formatTransactionForDisplay(Transaction transaction) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String fromTo = determineTransactionDirection(transaction);
@@ -101,10 +91,13 @@ public class TransactionController {
         };
     }
 
-    // Validation methods
     public String validateAmount(String amountStr) {
         if (amountStr == null || amountStr.trim().isEmpty()) {
             return "Amount is required";
+        }
+        
+        if (amountStr.indexOf('.') != amountStr.lastIndexOf('.')) {
+            return "Invalid amount format. Amount cannot contain multiple decimal points";
         }
 
         try {
@@ -112,12 +105,25 @@ public class TransactionController {
             if (amount <= 0) {
                 return "Amount must be positive";
             }
+            
+            if (amount > 1000000) {
+                return "Amount exceeds maximum allowed transaction value (1,000,000)";
+            }
+            
+            String amountString = String.valueOf(amount);
+            if (amountString.contains(".")) {
+                String[] parts = amountString.split("\\.");
+                if (parts.length > 1 && parts[1].length() > 2) {
+                    return "Amount can have at most 2 decimal places";
+                }
+            }
         } catch (NumberFormatException e) {
             return "Please enter a valid number";
         }
 
-        return null; // No validation errors
-    }    public String validateTransfer(String targetAccountIdStr, String amountStr) {
+        return null; 
+    }  
+      public String validateTransfer(String targetAccountIdStr, String amountStr) {
         if (targetAccountIdStr == null || targetAccountIdStr.trim().isEmpty()) {
             return "Target account ID is required";
         }
@@ -127,32 +133,46 @@ public class TransactionController {
             return amountValidation;
         }
 
-        // No need to try to parse as long since the IDs are strings
-        
-        // Check if target account exists
         Account targetAccount = transactionService.findAccountById(targetAccountIdStr.trim());
         if (targetAccount == null) {
             return "Target account not found";
         }
 
-        // Check for self-transfer
         if (accountId.equals(targetAccountIdStr.trim())) {
             return "Cannot transfer to the same account";
         }
         
-        // Check if the source account has enough funds
-        Account sourceAccount = transactionService.findAccountById(accountId);
-        double amount = Double.parseDouble(amountStr.trim());
-        if (sourceAccount.getBalance() < amount) {
-            return "Insufficient funds for transfer";
+        try {
+            Account sourceAccount = transactionService.findAccountById(accountId);
+            double amount = parseAmount(amountStr.trim());
+            if (sourceAccount.getBalance() < amount) {
+                return "Insufficient funds for transfer";
+            }
+        } catch (NumberFormatException e) {
+            return "Invalid amount format";
         }
 
         return null;
     }
 
-    // Helper methods
     private boolean isValidAmount(double amount) {
-        return amount > 0;
+        if (amount <= 0) {
+            return false;
+        }
+        
+        if (amount > 1000000) {
+            return false;
+        }
+        
+        String amountStr = String.valueOf(amount);
+        if (amountStr.contains(".")) {
+            String[] parts = amountStr.split("\\.");
+            if (parts.length > 1 && parts[1].length() > 2) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     private String determineTransactionDirection(Transaction transaction) {
@@ -193,7 +213,17 @@ public class TransactionController {
     }
 
     public double parseAmount(String amountStr) throws NumberFormatException {
-        return Double.parseDouble(amountStr.trim());
+        if (amountStr == null || amountStr.trim().isEmpty()) {
+            throw new NumberFormatException("Amount cannot be empty");
+        }
+        
+        String trimmedAmount = amountStr.trim();
+        
+        if (trimmedAmount.indexOf('.') != trimmedAmount.lastIndexOf('.')) {
+            throw new NumberFormatException("Invalid amount format");
+        }
+        
+        return Double.parseDouble(trimmedAmount);
     }
 
     public List<Customer> getAllCustomers() {
@@ -207,8 +237,7 @@ public class TransactionController {
     public String getCurrentAccountId() {
         return accountId;
     }
-
-
+    
     public long parseAccountId(String accountIdStr) throws NumberFormatException {
         return Long.parseLong(accountIdStr.trim());
     }

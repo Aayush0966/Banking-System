@@ -10,8 +10,8 @@ public class Customer extends BankEntity {
 
     public Customer(String name, String email, String phone) {
         super(name);
-        this.email = email;
-        this.phone = phone;
+        setEmail(email);
+        setPhone(phone);
         this.accounts = new ArrayList<>();
     }
 
@@ -20,6 +20,15 @@ public class Customer extends BankEntity {
     }
 
     public void setEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        if (!email.matches(emailRegex)) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        
         this.email = email;
     }
 
@@ -28,6 +37,16 @@ public class Customer extends BankEntity {
     }
 
     public void setPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new IllegalArgumentException("Phone number cannot be empty");
+        }
+        
+        String digitsOnly = phone.replaceAll("[^0-9]", "");
+        
+        if (digitsOnly.length() != 10) {
+            throw new IllegalArgumentException("Phone number must be exactly 10 digits");
+        }
+        
         this.phone = phone;
     }
 

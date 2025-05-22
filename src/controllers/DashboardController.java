@@ -13,7 +13,6 @@ public class DashboardController {
         this.transactionService = transactionService;
     }
 
-    // Customer-related business logic
     public List<Customer> getAllCustomers() {
         return transactionService.getAllCustomers();
     }
@@ -23,20 +22,26 @@ public class DashboardController {
     }
 
     public boolean addCustomer(String name, String email, String phone) {
-        if (name == null || name.trim().isEmpty() ||
-                email == null || email.trim().isEmpty() ||
-                phone == null || phone.trim().isEmpty()) {
+        String validationError = validateCustomerData(name, email, phone);
+        if (validationError != null) {
             return false;
         }
 
-        Customer customer = new Customer(name.trim(), email.trim(), phone.trim());
-        return transactionService.addCustomer(customer);
+        try {
+            Customer customer = new Customer(name.trim(), email.trim(), phone.trim());
+            return transactionService.addCustomer(customer);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public boolean updateCustomer(String customerId, String name, String email, String phone) {
-        if (customerId == null || name == null || name.trim().isEmpty() ||
-                email == null || email.trim().isEmpty() ||
-                phone == null || phone.trim().isEmpty()) {
+        if (customerId == null) {
+            return false;
+        }
+        
+        String validationError = validateCustomerData(name, email, phone);
+        if (validationError != null) {
             return false;
         }
 
@@ -45,11 +50,14 @@ public class DashboardController {
             return false;
         }
 
-        customer.setName(name.trim());
-        customer.setEmail(email.trim());
-        customer.setPhone(phone.trim());
-
-        return transactionService.updateCustomer(customer);
+        try {
+            customer.setName(name.trim());
+            customer.setEmail(email.trim());
+            customer.setPhone(phone.trim());
+            return transactionService.updateCustomer(customer);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public boolean canRemoveCustomer(String customerId) {
@@ -65,7 +73,6 @@ public class DashboardController {
         return transactionService.deleteCustomer(customerId);
     }
 
-    // Account-related business logic
     public List<Customer> getCustomersWithAccounts() {
         return transactionService.getAllCustomers().stream()
                 .filter(customer -> !customer.getAccounts().isEmpty())
@@ -105,7 +112,6 @@ public class DashboardController {
         return transactionService.deleteAccount(account.getCustomerId(), accountId);
     }
 
-    // Utility methods
     private String generateAccountNumber() {
         Random random = new Random();
         StringBuilder accountNumber = new StringBuilder();
@@ -115,18 +121,31 @@ public class DashboardController {
         return accountNumber.toString();
     }
 
-    // Validation helper methods
     public String validateCustomerData(String name, String email, String phone) {
         if (name == null || name.trim().isEmpty()) {
             return "Name is required";
         }
+        
         if (email == null || email.trim().isEmpty()) {
             return "Email is required";
         }
+        
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        if (!email.matches(emailRegex)) {
+            return "Invalid email format. Please enter a valid email address";
+        }
+        
         if (phone == null || phone.trim().isEmpty()) {
             return "Phone is required";
         }
-        return null; // No validation errors
+        
+        String digitsOnly = phone.replaceAll("[^0-9]", "");
+        
+        if (digitsOnly.length() != 10) {
+            return "Phone number must be exactly 10 digits";
+        }
+        
+        return null; 
     }
 
     public String validateAccountData(String accountName, String initialDepositStr) {
@@ -136,16 +155,28 @@ public class DashboardController {
         if (initialDepositStr == null || initialDepositStr.trim().isEmpty()) {
             return "Initial deposit amount is required";
         }
+        
+        if (initialDepositStr.indexOf('.') != initialDepositStr.lastIndexOf('.')) {
+            return "Invalid deposit amount format. Amount cannot contain multiple decimal points";
+        }
 
         try {
             double initialDeposit = Double.parseDouble(initialDepositStr.trim());
             if (initialDeposit < 0) {
                 return "Initial deposit cannot be negative";
             }
+            
+            String amountString = String.valueOf(initialDeposit);
+            if (amountString.contains(".")) {
+                String[] parts = amountString.split("\\.");
+                if (parts.length > 1 && parts[1].length() > 2) {
+                    return "Amount can have at most 2 decimal places";
+                }
+            }
         } catch (NumberFormatException e) {
             return "Invalid deposit amount";
         }
 
-        return null; // No validation errors
+        return null; 
     }
 }
