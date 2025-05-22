@@ -31,10 +31,18 @@ public class Customer extends BankEntity {
         this.phone = phone;
     }
 
+   public int getAccountsCount() {
+        return accounts.size();
+    }
+    
+    public boolean hasActiveAccounts() {
+    return !accounts.isEmpty();
+}
+    
+
     public List<Account> getAccounts() {
         return accounts;
     }
-
     public void addAccount(Account account) {
         accounts.add(account);
     }
