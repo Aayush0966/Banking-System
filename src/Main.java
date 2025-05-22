@@ -1,3 +1,4 @@
+import ui.DashboardUI;
 import ui.LoginUI;
 
 import javax.swing.*;
@@ -10,6 +11,6 @@ public class Main {
             System.err.println("Failed to set system look and feel: " + e.getMessage());
         }
 
-        SwingUtilities.invokeLater(() -> new LoginUI());
+        SwingUtilities.invokeLater(() -> new DashboardUI());
     }
 }
