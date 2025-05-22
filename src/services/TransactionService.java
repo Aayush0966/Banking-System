@@ -32,7 +32,6 @@ public class TransactionService {
             transactions = transactionFileHandler.loadData();
             accounts = accountFileHandler.loadData();
 
-            // Remove any duplicate transactions
             removeDuplicateTransactions();
 
             for (Account account : accounts) {
@@ -49,7 +48,6 @@ public class TransactionService {
         }
     }
     
-    // Helper method to remove duplicate transactions
     private void removeDuplicateTransactions() {
         List<Transaction> uniqueTransactions = new ArrayList<>();
         for (Transaction transaction : transactions) {
@@ -161,43 +159,32 @@ public class TransactionService {
         return false;
     }
 
-public boolean deleteAccount(String customerId, String accountId) {
-    System.out.println("Attempting to delete account with ID: " + accountId + " for customer ID: " + customerId);
-    Customer customer = findCustomerById(customerId);
-    if (customer == null) {
-        System.err.println("Customer with ID " + customerId + " not found.");
-        return false;
+    public boolean deleteAccount(String customerId, String accountId) {
+        Customer customer = findCustomerById(customerId);
+        if (customer == null) {
+            return false;
+        }
+        Account account = findAccountById(accountId);
+        if (account == null) {
+            return false;
+        }
+        customer.removeAccount(account);
+        accounts.remove(account); 
+        saveDataToFile();
+        return true;
     }
-    Account account = findAccountById(accountId);
-    if (account == null) {
-        System.err.println("Account with ID " + accountId + " not found.");
-        return false;
-    }
-    System.out.println("Removing account with ID: " + accountId + " from customer with ID: " + customerId);
-    customer.removeAccount(account);
-    accounts.remove(account); // Add this line to remove from accounts list
-    saveDataToFile();
-    System.out.println("Account with ID: " + accountId + " successfully deleted.");
-    return true;
-}
 
     public boolean deposit(String accountId, double amount) {
         Account account = findAccountById(accountId);
         if (account == null) return false;
         try {
-            // Get the current size of transactions in the account
             int initialSize = account.getTransactions().size();
-            
-            // Perform the deposit
             account.deposit(amount);
-            
-            // Add only the new transaction, not all transactions
             List<Transaction> accountTransactions = account.getTransactions();
             if (accountTransactions.size() > initialSize) {
                 Transaction newTransaction = accountTransactions.get(accountTransactions.size() - 1);
                 transactions.add(newTransaction);
             }
-            
             saveDataToFile();
             return true;
         } catch (IllegalArgumentException e) {
@@ -210,13 +197,9 @@ public boolean deleteAccount(String customerId, String accountId) {
         Account account = findAccountById(accountId);
         if (account == null) return false;
         try {
-            // Get the current size of transactions in the account
-            int initialSize = account.getTransactions().size();
-            
-            // Perform the withdrawal
+            int initialSize = account.getTransactions().size()
             account.withdraw(amount);
             
-            // Add only the new transaction, not all transactions
             List<Transaction> accountTransactions = account.getTransactions();
             if (accountTransactions.size() > initialSize) {
                 Transaction newTransaction = accountTransactions.get(accountTransactions.size() - 1);
@@ -238,13 +221,10 @@ public boolean deleteAccount(String customerId, String accountId) {
         if (sendingAccount == null || receivingAccount == null ) return false;
 
         try {
-            // Get the current size of transactions in the sending account
             int initialSize = sendingAccount.getTransactions().size();
             
-            // Perform the transfer
             sendingAccount.transfer(receivingAccount, amount);
             
-            // Add only the new transaction, not all transactions
             List<Transaction> sendingAccountTransactions = sendingAccount.getTransactions();
             if (sendingAccountTransactions.size() > initialSize) {
                 Transaction newTransaction = sendingAccountTransactions.get(sendingAccountTransactions.size() - 1);
@@ -260,43 +240,33 @@ public boolean deleteAccount(String customerId, String accountId) {
     }
 
  public List<Transaction> getTransactionsByAccount(String accountId) {
-    System.out.println("Fetching transactions for account ID: " + accountId);
     List<Transaction> sortedTransactions = new ArrayList<>();
-    // Track already added transaction IDs to avoid duplicates
     List<String> addedTransactionIds = new ArrayList<>();
     
     for (Transaction transaction : transactions) {
-        // Skip if we've already added this transaction
         if (addedTransactionIds.contains(transaction.getId())) {
             continue;
         }
         
-        System.out.println("Processing transaction: " + transaction);
         if (transaction.getType().equals("Deposit") || transaction.getType().equals("Withdrawal")) {
-            // Add null check before equals
             String sendingId = transaction.getSendingAccountId();
             if ((sendingId != null && sendingId.equals(accountId)) || 
                 (transaction.getType().equals("Withdrawal") && 
                  transaction.getReceivingAccountId() != null && 
                  transaction.getReceivingAccountId().equals(accountId))) {
-                System.out.println("Adding transaction to sorted list: " + transaction);
                 sortedTransactions.add(transaction);
                 addedTransactionIds.add(transaction.getId());
             }
         } else if (transaction.getType().equals("Transfer")) {
             String sendingId = transaction.getSendingAccountId();
             String receivingId = transaction.getReceivingAccountId();
-
-            System.out.println("Checking transfer transaction: Sending ID = " + sendingId + ", Receiving ID = " + receivingId);
             if ((sendingId != null && sendingId.equals(accountId)) || 
                 (receivingId != null && receivingId.equals(accountId))) {
-                System.out.println("Adding transaction to sorted list: " + transaction);
                 sortedTransactions.add(transaction);
                 addedTransactionIds.add(transaction.getId());
             }
         }
     }
-    System.out.println("Total transactions found for account ID " + accountId + ": " + sortedTransactions.size());
     return sortedTransactions;
 }
 
@@ -315,6 +285,6 @@ public boolean deleteAccount(String customerId, String accountId) {
         if (customer != null) {
             return new ArrayList<>(customer.getAccounts());
         }
-        return new ArrayList<>(); // Return empty list if customer not found
+        return new ArrayList<>(); 
     }
 }

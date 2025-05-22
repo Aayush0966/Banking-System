@@ -21,7 +21,6 @@ public abstract class BaseFrame extends JFrame {
     protected static final Color TEXT_COLOR = new Color(33, 37, 41);
     protected static final Color ERROR_COLOR = new Color(220, 53, 69);
     protected static final Color SUCCESS_COLOR = new Color(40, 167, 69);
-
     protected static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 20);
     protected static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
     protected static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
@@ -51,6 +50,7 @@ public abstract class BaseFrame extends JFrame {
     }
 
     protected abstract void setupUI();
+
     protected JPanel createButtonPanel(String[] labels, Runnable[] actions) {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         buttonPanel.setBackground(SECONDARY_COLOR);
@@ -75,8 +75,6 @@ public abstract class BaseFrame extends JFrame {
             public void mouseEntered(MouseEvent e) {
                 button.setBackground(hoverColor);
             }
-
-    
             public void mouseExited(MouseEvent e) {
                 button.setBackground(bgColor);
             }
@@ -105,7 +103,6 @@ public abstract class BaseFrame extends JFrame {
                 component.setFont(LABEL_FONT);
                 component.setForeground(TEXT_COLOR);
             }
-
             if (component instanceof JTextField) {
                 JTextField textField = (JTextField) component;
                 textField.setBorder(BorderFactory.createCompoundBorder(
@@ -113,7 +110,6 @@ public abstract class BaseFrame extends JFrame {
                         new EmptyBorder(8, 10, 8, 10)
                 ));
             }
-
             formPanel.add(component);
         }
         return formPanel;
@@ -123,11 +119,9 @@ public abstract class BaseFrame extends JFrame {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(PRIMARY_COLOR);
         headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
-
         JLabel titleLabel = new JLabel("Admin Dashboard", JLabel.CENTER);
         titleLabel.setFont(HEADER_FONT);
         titleLabel.setForeground(Color.WHITE);
-
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
         logoutButton.setOpaque(false);
@@ -136,12 +130,10 @@ public abstract class BaseFrame extends JFrame {
         logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
         logoutButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        logoutButton.setToolTipText(null); // disable tooltip
+        logoutButton.setToolTipText(null); 
         logoutButton.addActionListener(e -> handleLogout.run());
-
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         headerPanel.add(logoutButton, BorderLayout.EAST);
-
         return headerPanel;
     }
 
@@ -180,10 +172,9 @@ public abstract class BaseFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         JPanel panel = new JPanel(new BorderLayout());
         scrollPane.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(PRIMARY_COLOR, 1, true), // Rounded line border
-                new EmptyBorder(10, 10, 10, 10)         // Internal padding
+                new LineBorder(PRIMARY_COLOR, 1, true), 
+                new EmptyBorder(10, 10, 10, 10)         
         ));
-
         panel.setBackground(SECONDARY_COLOR);
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -225,9 +216,10 @@ public abstract class BaseFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         customerPanel.add(scrollPane, BorderLayout.CENTER);
         JPanel tablePanel = createTablePanel(model, table);
+        tablePanel.setName("customerTablePanel");
         customerPanel.add(tablePanel, BorderLayout.CENTER);
         String[] labels = {"Add Customer", "Edit Customer", "Remove Customer"};
-        Runnable[] actions = {handleAddCustomer, handleEditCustomer, handleRemoveCustomer}; // Fixed order to match labels
+        Runnable[] actions = {handleAddCustomer, handleEditCustomer, handleRemoveCustomer};
         JPanel buttonPanel = createButtonPanel(labels, actions);
         customerPanel.add(buttonPanel, BorderLayout.SOUTH);
         return customerPanel;
@@ -240,16 +232,9 @@ public abstract class BaseFrame extends JFrame {
     accountPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
     accountTable.setModel(accountTableModel);
     accountTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    
-    // Create a table panel that will contain the account table
     JPanel tablePanel = createTablePanel(accountTableModel, accountTable);
-    
-    // Add a name to the panel for easier identification
     tablePanel.setName("accountTablePanel");
-    
-    // Add the table panel to the account panel
     accountPanel.add(tablePanel, BorderLayout.CENTER);
-    
     String[] labels = {"Add Account", "Account Operations", "Remove Account"};
     Runnable[] actions = {handleAddAccount, handleAccountOperations, handleRemoveAccount};
     JPanel buttonPanel = createButtonPanel(labels, actions);
@@ -264,6 +249,7 @@ public abstract class BaseFrame extends JFrame {
         UIManager.put("OptionPane.messageForeground", TEXT_COLOR);
         JOptionPane.showMessageDialog(this, message, title, messageType);
     }
+
     protected void showErrorMessage(String message) {
         UIManager.put("Button.foreground", Color.BLACK);
         UIManager.put("OptionPane.background", SECONDARY_COLOR);
@@ -283,12 +269,14 @@ public abstract class BaseFrame extends JFrame {
     protected void showWarningMessage(String message) {
         showMessage(message, "Warning", JOptionPane.WARNING_MESSAGE);
     }
+
     protected String showInputDialog(String message) {
         UIManager.put("OptionPane.background", SECONDARY_COLOR);
         UIManager.put("Panel.background", SECONDARY_COLOR);
         UIManager.put("OptionPane.messageForeground", TEXT_COLOR);
         return JOptionPane.showInputDialog(this, message);
     }
+
     protected int showConfirmDialog(String message) {
         UIManager.put("Button.foreground", Color.BLACK);
         UIManager.put("OptionPane.background", SECONDARY_COLOR);
@@ -302,11 +290,9 @@ public abstract class BaseFrame extends JFrame {
         comboBox.setFont(LABEL_FONT);
         comboBox.setBackground(Color.WHITE);
         comboBox.setForeground(TEXT_COLOR);
-
         for (T item : items) {
             comboBox.addItem(item);
         }
-
         comboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
@@ -320,7 +306,6 @@ public abstract class BaseFrame extends JFrame {
                 } else if (value != null) {
                     setText(value.toString());
                 }
-
                 if (isSelected) {
                     setBackground(ACCENT_COLOR);
                     setForeground(Color.WHITE);
